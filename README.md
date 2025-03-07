@@ -12,11 +12,11 @@ This repository contains all the source code, data, and circuits used in our stu
   - ESP (Estimated Success Probability) [[2]](https://dl.acm.org/doi/10.1145/3297858.3304007)
   - QVA (Quantum Vulnerability Analysis) [[3]](https://ieeexplore.ieee.org/document/10361567)
   - Our proposed approach
-- **`data_*.csv`**: Experimental data from six separate executions on IBM Q processors:
+- **`data/data_*.csv`**: Experimental data from six separate executions on IBM Q processors:
   - `data_1.csv, data_2.csv, ..., data_6.csv` contain real hardware execution results.
   - `data_1.csv` was used to generate the figures in the paper.
   - `data_depol_simulation.csv` contains results from depolarizing noise simulations.
-- **`figure_*.py`**: Source code to generate all figures presented in the paper, ensuring full reproducibility of results.
+- **`figures/figure_*.py`**: Source code to generate all figures presented in the paper, ensuring full reproducibility of results.
 
 ## How to Replicate the Experiments
 
