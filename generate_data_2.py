@@ -34,7 +34,8 @@ backend_name = data[4][0]
 
 service = QiskitRuntimeService(channel="ibm_quantum", token=token)
 job = service.job(job_id)
-raw_counts = job.result().get_counts()
+raw_counts = [res.data.meas.get_counts() if 'meas' in res.data else res.data.c.get_counts() for res in job.result()]
+
 backend = job.backend()
 running_time = datetime.fromisoformat(job.metrics()['timestamps']['running'])
 
@@ -42,13 +43,20 @@ depths = []
 gates = []
 
 fid_qiskit = []
+fid_qiskit_thermal = []
 fid_esp = []
+fid_esp_thermal = []
 fid_qva = []
+fid_qva_thermal = []
 fid_depol = []
 fid_depol_thermal = []
 
 sr_raw_IBMQ = []
 sr_mit_IBMQ = []
+
+qiskit_noise_model = noise.NoiseModel.from_backend(backend, thermal_relaxation=True)
+depol_error_params, gate_times, t1_times, t2_times = depol_backend_errors(backend, time=running_time)
+esp_qva_error_params, _, _, _ = esp_qva_backend_errors(backend, time=running_time)
 
 for i,circ in enumerate(circuits):
     print(f'{i} out of {len(circuits)} with gates {len(circ.data)}')
@@ -56,17 +64,19 @@ for i,circ in enumerate(circuits):
     depths.append(circ.depth())
     gates.append(len(circ.data))
 
-    noiseless_qiskit_counts = qiskit_counts(circ)
-    sr_raw_IBMQ.append(sr_from_counts(noiseless_qiskit_counts, raw_counts[i]))
+    sr_raw_IBMQ.append(raw_counts[i]['0'*len(list(raw_counts[i].keys())[0])]/2048)
 
     mit_counts = mitigate(circ, raw_counts[i], backend, time=running_time)
-    sr_mit_IBMQ.append(sr_from_counts(noiseless_qiskit_counts, mit_counts))
+    sr_mit_IBMQ.append(mit_counts['0'*len(list(mit_counts.keys())[0])]/2048)
 
-    fid_qiskit.append(qiskit_fidelity(circ, backend, time=running_time))
-    fid_esp.append(esp(circ, backend, time=running_time))
-    fid_qva.append((qva(circ, backend, w=1, time=running_time), qva(circ, backend, w=0, time=running_time)))
-    fid_depol.append((depolarizing(circ, backend, p=1, time=running_time), depolarizing(circ, backend, p=0, time=running_time)))
-    fid_depol_thermal.append((depolarizing(circ, backend, p=1, time=running_time, thermal=True), depolarizing(circ, backend, p=0, time=running_time, thermal=True)))
+    fid_qiskit.append(qiskit_fidelity(circ, backend, time=running_time, noise_model=qiskit_noise_model))
+    fid_qiskit_thermal.append(qiskit_fidelity_thermal(circ, backend, time=running_time, error_params=esp_qva_error_params, gate_times=gate_times, t1_times=t1_times, t2_times=t2_times, noise_model=qiskit_noise_model))
+    fid_esp.append(esp(circ, backend, time=running_time, error_params=esp_qva_error_params, gate_times=gate_times, t1_times=t1_times, t2_times=t2_times))
+    fid_esp_thermal.append(esp_thermal(circ, backend, time=running_time, error_params=esp_qva_error_params, gate_times=gate_times, t1_times=t1_times, t2_times=t2_times))
+    fid_qva.append((qva(circ, backend, w=1, time=running_time, error_params=esp_qva_error_params, gate_times=gate_times, t1_times=t1_times, t2_times=t2_times), qva(circ, backend, w=0, time=running_time, error_params=esp_qva_error_params, gate_times=gate_times, t1_times=t1_times, t2_times=t2_times)))
+    fid_qva_thermal.append((qva_thermal(circ, backend, w=1, time=running_time, error_params=esp_qva_error_params, gate_times=gate_times, t1_times=t1_times, t2_times=t2_times), qva_thermal(circ, backend, w=0, time=running_time, error_params=esp_qva_error_params, gate_times=gate_times, t1_times=t1_times, t2_times=t2_times)))
+    fid_depol.append((depolarizing(circ, backend, p=1, time=running_time, error_params=depol_error_params, gate_times=gate_times, t1_times=t1_times, t2_times=t2_times), depolarizing(circ, backend, p=0, time=running_time, error_params=depol_error_params, gate_times=gate_times, t1_times=t1_times, t2_times=t2_times)))
+    fid_depol_thermal.append((depolarizing_thermal(circ, backend, p=1, time=running_time, error_params=depol_error_params, gate_times=gate_times, t1_times=t1_times, t2_times=t2_times), depolarizing_thermal(circ, backend, p=0, time=running_time, error_params=depol_error_params, gate_times=gate_times, t1_times=t1_times, t2_times=t2_times)))
 
 with open(experiment + '_results.csv', mode='w') as file:
     writer = csv.writer(file)
@@ -76,10 +86,13 @@ with open(experiment + '_results.csv', mode='w') as file:
     writer.writerow(gates)
 
     writer.writerow(fid_qiskit)
+    writer.writerow(fid_qiskit_thermal)
     writer.writerow(fid_esp)
+    writer.writerow(fid_esp_thermal)
     writer.writerow(fid_qva)
+    writer.writerow(fid_qva_thermal)
     writer.writerow(fid_depol)
     writer.writerow(fid_depol_thermal)
 
     writer.writerow(sr_raw_IBMQ)
-    writer.writerow(sr_mit_IBMQ) 
+    writer.writerow(sr_mit_IBMQ)

@@ -36,7 +36,7 @@ depol_error = [(fid_max_depol[i]-fid_min_depol[i])/2 for i in range(len(fid_min_
 
 depol_diff = [fid_avg_depol[i] - fid_qiskit[i] for i in range(len(fid_avg_depol))]
 
-y_lims = (-0.5, 1)
+y_lims = (-1, 1)
 
 fig, axs = plt.subplots(ncols=2, nrows=1, figsize=(14, 4))
 
@@ -49,6 +49,7 @@ axs[0].set_xlabel('This Work Pred. Fidelity', fontsize=label_size)
 
 # Depol Difference
 axs[1].scatter(num_gates, depol_diff, c='tab:green', alpha=0.75, s=scatter_size)
+axs[1].errorbar(num_gates, depol_diff, yerr=depol_error, fmt='o', c='gray', markersize=0, alpha=0.5, zorder=-1)
 axs[1].set_xlabel('Num. of Gates', fontsize=label_size)
 
 ax_histy = axs[1].inset_axes([1.05, 0, 0.25, 1], sharey=axs[1])
@@ -66,7 +67,6 @@ axs[1].set_box_aspect(0.6)
 axs[1].set_xscale('log')
 axs[1].axhline(0, color='tab:gray', linestyle='--', zorder=-10)
 axs[1].tick_params(axis='both', which='major', labelsize=ticks_size)
-axs[1].set_yticks([-0.5, -0.25, 0, 0.25, 0.5, 0.75, 1])
 axs[1].set_ylabel('Fidelity\nDifference', fontsize=label_size)
 
 plt.subplots_adjust(left=0, bottom=0.17, right=0.88, top=0.95, wspace=0, hspace=0.2)

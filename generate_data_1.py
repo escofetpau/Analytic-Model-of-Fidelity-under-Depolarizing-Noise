@@ -1,4 +1,4 @@
-from qiskit_ibm_runtime import QiskitRuntimeService
+from qiskit_ibm_runtime import QiskitRuntimeService, Session, Sampler
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 import qiskit
 
@@ -45,20 +45,23 @@ for f, file in enumerate(filenames):
     executed_filenames.append(file)
     circuits_to_execute.append(isa_circ)
 
-job = backend.run(circuits_to_execute, shots=2048)
-job_id = job.job_id()
-date = datetime.now().isoformat()
+with Session(backend=backend):
+    sampler = Sampler()
+    job = sampler.run(circuits_to_execute, shots=2048)
+    job_id = job.job_id()
 
-pickle.dump(circuits_to_execute, open(f'IBMQ_{date}_circuits', 'wb'))
+    date = datetime.now().isoformat()
 
-# Save results into csv file
-with open(f'IBMQ_{date}.csv', mode='w') as file:
-    writer = csv.writer(file)
+    pickle.dump(circuits_to_execute, open(f'IBMQ_{date}_circuits', 'wb'))
 
-    writer.writerow([token])
-    writer.writerow(executed_filenames)
-    writer.writerow(num_qubits)
-    writer.writerow([job_id])
-    writer.writerow([backend_name])
+    # Save results into csv file
+    with open(f'IBMQ_{date}.csv', mode='w') as file:
+        writer = csv.writer(file)
 
-print(f'IBMQ_{date}')
+        writer.writerow([token])
+        writer.writerow(executed_filenames)
+        writer.writerow(num_qubits)
+        writer.writerow([job_id])
+        writer.writerow([backend_name])
+
+    print(f'rev_IBMQ_{date}')

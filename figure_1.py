@@ -6,7 +6,7 @@ ticks_size = 15
 label_size = 20
 fig, ax = plt.subplots(figsize=(20, 7))
 
-file = open('data.csv', 'r')
+file = open('data_1.csv', 'r')
 data = list(csv.reader(file, delimiter=","))
 
 filenames = data[0]
@@ -15,22 +15,33 @@ depths = [int(d) for d in data[2]]
 num_gates = [int(g) for g in data[3]]
 
 fid_qiskit = [float(f) for f in data[4]]
-fid_esp = [float(f) for f in data[5]]
-fid_min_qva = [float(eval(f)[0]) for f in data[6]]
-fid_max_qva = [float(eval(f)[1]) for f in data[6]]
+fid_qiskit_thermal = [float(f) for f in data[5]]
+
+fid_esp = [float(f) for f in data[6]]
+fid_esp_thermal = [float(f) for f in data[7]]
+
+fid_min_qva = [float(eval(f)[0]) for f in data[8]]
+fid_max_qva = [float(eval(f)[1]) for f in data[8]]
 fid_avg_qva = [(fid_min_qva[i] + fid_max_qva[i])/2 for i in range(len(fid_min_qva))]
 qva_error = [(fid_max_qva[i]-fid_min_qva[i])/2 for i in range(len(fid_min_qva))]
-fid_min_depol = [float(eval(f)[0]) for f in data[7]]
-fid_max_depol = [float(eval(f)[1]) for f in data[7]]
+
+fid_min_qva_thermal = [float(eval(f)[0]) for f in data[9]]
+fid_max_qva_thermal = [float(eval(f)[1]) for f in data[9]]
+fid_avg_qva_thermal = [(fid_min_qva_thermal[i] + fid_max_qva_thermal[i])/2 for i in range(len(fid_min_qva_thermal))]
+qva_thermal_error = [(fid_max_qva_thermal[i]-fid_min_qva_thermal[i])/2 for i in range(len(fid_min_qva_thermal))]
+
+fid_min_depol = [float(eval(f)[0]) for f in data[10]]
+fid_max_depol = [float(eval(f)[1]) for f in data[10]]
 fid_avg_depol = [(fid_min_depol[i] + fid_max_depol[i])/2 for i in range(len(fid_min_depol))]
 depol_error = [(fid_max_depol[i]-fid_min_depol[i])/2 for i in range(len(fid_min_depol))]
-fid_min_depol_thermal = [float(eval(f)[0]) for f in data[8]]
-fid_max_depol_thermal = [float(eval(f)[1]) for f in data[8]]
+
+fid_min_depol_thermal = [float(eval(f)[0]) for f in data[11]]
+fid_max_depol_thermal = [float(eval(f)[1]) for f in data[11]]
 fid_avg_depol_thermal = [(fid_min_depol_thermal[i] + fid_max_depol_thermal[i])/2 for i in range(len(fid_min_depol_thermal))]
 depol_thermal_error = [(fid_max_depol_thermal[i]-fid_min_depol_thermal[i])/2 for i in range(len(fid_min_depol_thermal))]
 
-sr_raw_IBMQ = [float(f) for f in data[9]]
-sr_mit_IBMQ = [float(f) for f in data[10]]
+sr_raw_IBMQ = [float(f) for f in data[12]]
+sr_mit_IBMQ = [float(f) for f in data[13]]
 
 ax.scatter(num_gates, fid_qiskit, label='Qiskit', color='tab:blue', alpha=0.75, s=[scatter_size*q for q in num_qubits])
 ax.scatter(num_gates, fid_esp, label='ESP', color='tab:orange', alpha=0.75, s=[scatter_size*q for q in num_qubits])
@@ -77,15 +88,15 @@ for patch, color in zip(box['boxes'], colors):
 
 
 ############## PLOT DEPOL RESULTS ################
-ax.scatter(num_gates, fid_avg_depol, label='Depol', color='tab:green', alpha=0.75, s=[scatter_size*q for q in num_qubits])
-ax.scatter(num_gates, fid_avg_depol_thermal, label='Depol Thermal', color='tab:green', alpha=0.75, marker = 'x', s=[scatter_size*q for q in num_qubits])
-box = axins.boxplot([depol_diff, depol_thermal_diff], positions=[5, 5.5], labels=['Depol', 'Depol\nTherm.'], patch_artist=True, widths=0.45)
-for patch in box['boxes']:
-    patch.set_facecolor('tab:green')
-    patch.set_alpha(0.75)
-    patch.set_edgecolor('black')
-    for median in box['medians']:
-        median.set_color('black')
+# ax.scatter(num_gates, fid_avg_depol, label='This Work', color='tab:green', alpha=0.75, s=[scatter_size*q for q in num_qubits])
+# ax.scatter(num_gates, fid_avg_depol_thermal, label='This Work +$T_{1,2}$', color='tab:green', alpha=0.75, marker = 'x', s=[scatter_size*q for q in num_qubits])
+# box = axins.boxplot([depol_diff, depol_thermal_diff], positions=[5, 5.5], labels=['This Work', 'This Work\n+$T_{1,2}$'], patch_artist=True, widths=0.45)
+# for patch in box['boxes']:
+#     patch.set_facecolor('tab:green')
+#     patch.set_alpha(0.75)
+#     patch.set_edgecolor('black')
+#     for median in box['medians']:
+#         median.set_color('black')
 ##################################################
 
 

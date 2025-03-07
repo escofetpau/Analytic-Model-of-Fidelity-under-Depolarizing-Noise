@@ -1,71 +1,76 @@
+from matplotlib import pyplot as plt
 import csv
-import matplotlib.pyplot as plt
 import numpy as np
+
 
 scatter_size = 50
 ticks_size = 15
 label_size = 20
-plot_width = 3
+plot_width = 2.5
 
-file = open('data.csv', 'r')
+styles = ['-', '--', '-.', ':']
+
+
+file = open(f'link_feasibility_data.csv', 'r')
 data = list(csv.reader(file, delimiter=","))
+file.close()
 
-filenames = data[0]
-num_qubits = [int(q) for q in data[1]]
-depths = [int(d) for d in data[2]]
-num_gates = [int(g) for g in data[3]]
+sizes = [int(i) for i in data[0]]
+p1 = [float(i) for i in data[1]]
+p1_label = ['$p_1=0$', '$p_1=10^{-7}$', '$p_1=10^{-6}$']
 
-fid_qiskit = [float(f) for f in data[4]]
-fid_esp = [float(f) for f in data[5]]
-fid_min_qva = [float(eval(f)[0]) for f in data[6]]
-fid_max_qva = [float(eval(f)[1]) for f in data[6]]
-fid_avg_qva = [(fid_min_qva[i] + fid_max_qva[i])/2 for i in range(len(fid_min_qva))]
-qva_error = [(fid_max_qva[i]-fid_min_qva[i])/2 for i in range(len(fid_min_qva))]
-fid_min_depol = [float(eval(f)[0]) for f in data[7]]
-fid_max_depol = [float(eval(f)[1]) for f in data[7]]
-fid_avg_depol = [(fid_min_depol[i] + fid_max_depol[i])/2 for i in range(len(fid_min_depol))]
-depol_error = [(fid_max_depol[i]-fid_min_depol[i])/2 for i in range(len(fid_min_depol))]
-fid_min_depol_thermal = [float(eval(f)[0]) for f in data[8]]
-fid_max_depol_thermal = [float(eval(f)[1]) for f in data[8]]
-fid_avg_depol_thermal = [(fid_min_depol_thermal[i] + fid_max_depol_thermal[i])/2 for i in range(len(fid_min_depol_thermal))]
-depol_thermal_error = [(fid_max_depol_thermal[i]-fid_min_depol_thermal[i])/2 for i in range(len(fid_min_depol_thermal))]
+qft_l = [[float(i) for i in row] for row in data[2:2+len(p1)]]
+qvol_l = [[float(i) for i in row] for row in data[2+len(p1):2+2*len(p1)]]
+cdkm_l = [[float(i) for i in row] for row in data[2+2*len(p1):2+3*len(p1)]]
+draper_l = [[float(i) for i in row] for row in data[2+3*len(p1):2+4*len(p1)]]
+ghz_l = [[float(i) for i in row] for row in data[2+4*len(p1):2+5*len(p1)]]
 
-sr_raw_IBMQ = [float(f) for f in data[9]]
-sr_mit_IBMQ = [float(f) for f in data[10]]
+fig, ax = plt.subplots(ncols=1, figsize=(10, 5))
 
-qiskit_diff = [fid_qiskit[i] - sr_mit_IBMQ[i] for i in range(len(fid_qiskit))]
-esp_diff = [fid_esp[i] - sr_mit_IBMQ[i] for i in range(len(fid_esp))]
-qva_diff = [fid_avg_qva[i] - sr_mit_IBMQ[i] for i in range(len(fid_avg_qva))]
-qva_0_diff = [fid_max_qva[i] - sr_mit_IBMQ[i] for i in range(len(fid_max_qva))]
-depol_diff = [fid_avg_depol[i] - sr_mit_IBMQ[i] for i in range(len(fid_avg_depol))]
-depol_thermal_diff = [fid_avg_depol_thermal[i] - sr_mit_IBMQ[i] for i in range(len(fid_avg_depol_thermal))]
+for i in range(len(p1)):
+    # for each circuit plot only values different than -1
+    valid_elem = len([j for j in range(len(qft_l[i])) if qft_l[i][j] != -1])
+    ax.plot(sizes[:valid_elem], qft_l[i][:valid_elem], color='tab:blue', linewidth=plot_width, linestyle=styles[i], alpha=0.75)
 
-fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(12, 5))
+    valid_elem = len([j for j in range(len(qvol_l[i])) if qvol_l[i][j] != -1])
+    ax.plot(sizes[:valid_elem], qvol_l[i][:valid_elem], color='tab:green', linewidth=plot_width, linestyle=styles[i], alpha=0.75)
+    
+    valid_elem = len([j for j in range(len(cdkm_l[i])) if cdkm_l[i][j] != -1])
+    ax.plot(sizes[:valid_elem], cdkm_l[i][:valid_elem], color='tab:red', linewidth=plot_width, linestyle=styles[i], alpha=0.75)
 
-threshold = np.linspace(0, 0.25, 100)
+    valid_elem = len([j for j in range(len(draper_l[i])) if draper_l[i][j] != -1])
+    ax.plot(sizes[:valid_elem], draper_l[i][:valid_elem], color='tab:purple', linewidth=plot_width, linestyle=styles[i], alpha=0.75)
 
-qiskit_accuracy = [len([i for i in range(len(num_gates)) if abs(qiskit_diff[i]) < t])/len(num_gates) for t in threshold]
-esp_accuracy = [len([i for i in range(len(num_gates)) if abs(esp_diff[i]) < t])/len(num_gates) for t in threshold]
-qva_accuracy = [len([i for i in range(len(num_gates)) if abs(qva_diff[i]) < t])/len(num_gates) for t in threshold]
-qva_0_accuracy = [len([i for i in range(len(num_gates)) if abs(qva_0_diff[i]) < t])/len(num_gates) for t in threshold]
-depol_accuracy = [len([i for i in range(len(num_gates)) if abs(depol_diff[i]) < t])/len(num_gates) for t in threshold]
-depol_thermal_accuracy = [len([i for i in range(len(num_gates)) if abs(depol_thermal_diff[i]) < t])/len(num_gates) for t in threshold]
+    valid_elem = len([j for j in range(len(ghz_l[i])) if ghz_l[i][j] != -1])
+    ax.plot(sizes[:valid_elem], ghz_l[i][:valid_elem], color='tab:orange', linewidth=plot_width, linestyle=styles[i], alpha=0.75)
 
-ax.plot(threshold, qiskit_accuracy, label='Qiskit', color='tab:blue', alpha=0.75, linewidth=plot_width)
-ax.plot(threshold, esp_accuracy, label='ESP', color='tab:orange', alpha=0.75, linewidth=plot_width)
-ax.plot(threshold, qva_accuracy, label='QVA', color='tab:red', alpha=0.75, linewidth=plot_width)
-ax.plot(threshold, qva_0_accuracy, label='QVA 0', color='tab:red', alpha=0.75, linewidth=plot_width, linestyle='--')
-ax.plot(threshold, depol_accuracy, label='Depol', color='tab:green', alpha=0.75, linewidth=plot_width)
-ax.plot(threshold, depol_thermal_accuracy, label='Depol Thermal', color='tab:green', alpha=0.75, linewidth=plot_width, linestyle='--')
+ax.set_xlabel('Number of qubits', fontsize=label_size)
+ax.set_ylabel('2-qubit gate $p_2$', fontsize=label_size)
 
+ax.plot([], [], color='tab:blue', linewidth=plot_width, label='QFT')
+ax.plot([], [], color='tab:green', linewidth=plot_width, label='QVolume')
+ax.plot([], [], color='tab:red', linewidth=plot_width, label='Cuccaro Adder')
+ax.plot([], [], color='tab:purple', linewidth=plot_width, label='Draper Adder')
+ax.plot([], [], color='tab:orange', linewidth=plot_width, label='GHZ')
 
+ax.plot([], [], color='tab:orange', linewidth=0, label=' ')
+
+ax.axhline(y=p1[1], color='gray', linestyle=styles[1], linewidth=1.5, alpha=0.75, zorder=-1)
+ax.axhline(y=p1[2], color='gray', linestyle=styles[2], linewidth=1.5, alpha=0.75, zorder=-1)
+
+ax.text(x=11, y=p1[1], s=p1_label[1], fontsize=ticks_size, color='gray', ha='left', va='bottom')
+ax.text(x=11, y=p1[2], s=p1_label[2], fontsize=ticks_size, color='gray', ha='left', va='bottom')
+
+for i in range(len(p1)):
+    ax.plot([], [], color='black', linewidth=plot_width, linestyle=styles[i], label=p1_label[i])
+
+ax.set_xlim([min(sizes), max(sizes)])
+ax.set_yscale('log')
+
+ax.legend(fontsize=ticks_size*0.9, ncols=3)
+
+# ticks size
 ax.tick_params(axis='both', which='major', labelsize=ticks_size)
-
-ax.set_ylim(0, 1)
-
-ax.set_xlabel('Threshold', fontsize=label_size)
-ax.set_ylabel('Accuracy', fontsize=label_size)
-ax.legend(fontsize=ticks_size)
 
 plt.tight_layout()
 plt.show()
