@@ -1,7 +1,7 @@
 # Analytic Model of Fidelity under Depolarizing Noise
 
 
-This repository contains all the source code, data, and circuits used in our study on fidelity estimation for quantum circuits under depolarizing noise and coherence errors. The repository accompanies the research paper published at: [An Accurate Efficient Analytic Model of Fidelity under Depolarizing Noise oriented to Large Scale Quantum System Design](TODO).
+This repository contains all the source code, data, and circuits used in our study on fidelity estimation for quantum circuits under depolarizing noise and coherence errors. The repository accompanies the research paper published at: [An Accurate Efficient Analytic Model of Fidelity under Depolarizing Noise oriented to Large Scale Quantum System Design](https://arxiv.org/abs/2503.06693).
 
 ## Repository Structure
 
@@ -34,7 +34,7 @@ All scripts allow users to modify simulation parameters as needed.
 
 ## Citation
 If you use this repository in your work, please cite our paper:
-> [An Accurate Efficient Analytic Model of Fidelity under Depolarizing Noise oriented to Large Scale Quantum System Design](TODO)
+> [An Accurate Efficient Analytic Model of Fidelity under Depolarizing Noise oriented to Large Scale Quantum System Design](https://arxiv.org/abs/2503.06693)
 
 We hope this repository facilitates further research in quantum circuit fidelity estimation. If you have any questions or find issues, feel free to reach out! [pau.escofet@upc.edu](mailto:pau.escofet@upc.edu)
 
